@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use serde_json;
 use std::collections::{HashMap, VecDeque};
 use serde::{Serialize, Deserialize};
-
+use std::fs::OpenOptions;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CPU {
     registers: [i32; 4],
@@ -30,12 +30,7 @@ impl CPU {
             loop_counter: HashMap::new(),
         }
     }
-    pub fn save_execution_history(&self) {
-        let json = serde_json::to_string_pretty(&self.execution_history).unwrap();
-        let mut file = File::create("execution_data.json").unwrap();
-        file.write_all(json.as_bytes()).unwrap();
-        println!("📁 AI Execution Data Saved!");
-    }
+
     pub fn load_execution_history(&mut self) {
         if let Ok(mut file) = File::open("execution_data.json") {
             let mut json_data = String::new();
@@ -48,6 +43,34 @@ impl CPU {
     }
     pub fn load_program(&mut self, program: &[u8]) {
         self.memory[..program.len()].copy_from_slice(program);
+    }
+
+    pub fn save_execution_history(&self) {
+        println!("📋 Execution History Before Saving: {:?}", self.execution_history);
+    
+        match serde_json::to_string_pretty(&self.execution_history) {
+            Ok(json) => {
+                let mut file = match OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open("execution_data.json")
+                {
+                    Ok(file) => file,
+                    Err(e) => {
+                        println!("❌ Error opening file: {}", e);
+                        return;
+                    }
+                };
+    
+                if let Err(e) = file.write_all(json.as_bytes()) {
+                    println!("❌ Error writing to file: {}", e);
+                } else {
+                    println!("📁 AI Execution Data Successfully Saved!");
+                }
+            }
+            Err(e) => println!("❌ Error serializing execution data: {}", e),
+        }
     }
 
     pub fn optimize_program(&mut self, program: &[u8]) -> Vec<u8> {
@@ -98,64 +121,66 @@ impl CPU {
     
 
 
-        pub fn execute(&mut self) {
-            while !self.halted {
-                let pc = self.pc;
+    pub fn execute(&mut self) {
+        while !self.halted {
+            let pc = self.pc;
     
-                if let Some(count) = self.execution_count.get_mut(&pc) {
-                    *count += 1;
-                } else {
-                    self.execution_count.insert(pc, 1);
+            // Update both execution_count and execution_history
+            *self.execution_count.entry(pc).or_insert(0) += 1;
+            *self.execution_history.entry(pc).or_insert(0) += 1;
+    
+            if self.prediction_history.len() >= 2 {
+                let last = *self.prediction_history.back().unwrap();
+                let jump_pair = (last, pc);
+    
+                let entry = self.loop_counter.entry(jump_pair).or_insert(0);
+                *entry += 1;
+    
+                if *entry > 5 {
+                    println!(
+                        "⛔ AI Detected Infinite Loop: Repeated jumps between {} and {}. Halting execution.",
+                        last, pc
+                    );
+                    self.halted = true;
+                    break;
                 }
-                if self.prediction_history.len() >= 2 {
-                    let last = *self.prediction_history.back().unwrap();
-                    let jump_pair = (last, pc);
+            }
     
-                    let entry = self.loop_counter.entry(jump_pair).or_insert(0);
-                    *entry += 1;
+            self.prediction_history.push_back(pc);
+            if self.prediction_history.len() > 10 {
+                self.prediction_history.pop_front();
+            }
     
-                    if *entry > 5 { 
-                        println!("⛔ AI Detected Infinite Loop: Repeated jumps between {} and {}. Halting execution.", last, pc);
-                        self.halted = true;
-                        break;
-                    }
+            let instruction = self.memory[self.pc];
+    
+            match instruction {
+                0x01 => {
+                    let reg = self.memory[self.pc + 1] as usize;
+                    let val = self.memory[self.pc + 2] as i32;
+                    self.registers[reg] = val;
+                    self.pc += 3;
                 }
-    
-                self.prediction_history.push_back(pc);
-                if self.prediction_history.len() > 10 {
-                    self.prediction_history.pop_front(); 
+                0x02 => {
+                    let reg1 = self.memory[self.pc + 1] as usize;
+                    let reg2 = self.memory[self.pc + 2] as usize;
+                    self.registers[reg1] += self.registers[reg2];
+                    self.pc += 3;
                 }
-    
-                let instruction = self.memory[self.pc];
-    
-                match instruction {
-                    0x01 => { // MOV Rn, value
-                        let reg = self.memory[self.pc + 1] as usize;
-                        let val = self.memory[self.pc + 2] as i32;
-                        self.registers[reg] = val;
-                        self.pc += 3;
-                    }
-                    0x02 => { // ADD Rn, Rm
-                        let reg1 = self.memory[self.pc + 1] as usize;
-                        let reg2 = self.memory[self.pc + 2] as usize;
-                        self.registers[reg1] += self.registers[reg2];
-                        self.pc += 3;
-                    }
-                    0x03 => { // JMP Address
-                        let addr = self.memory[self.pc + 1] as usize;
-                        self.pc = addr;
-                    }
-                    0xFF => { // HALT
-                        println!("🚀 Program Halted Normally.");
-                        self.halted = true;
-                    }
-                    _ => {
-                        println!("❌ Unknown Instruction at {}: {}", self.pc, instruction);
-                        self.halted = true;
-                    }
+                0x03 => {
+                    let addr = self.memory[self.pc + 1] as usize;
+                    self.pc = addr;
+                }
+                0xFF => {
+                    println!("🚀 Program Halted Normally.");
+                    self.halted = true;
+                }
+                _ => {
+                    println!("❌ Unknown Instruction at {}: {}", self.pc, instruction);
+                    self.halted = true;
                 }
             }
         }
+    }
     
     
 
