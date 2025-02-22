@@ -1,0 +1,22 @@
+mod cpu;
+use cpu::CPU;
+
+fn main() {
+    let mut cpu = CPU::new();
+    let program: [u8; 24] = [
+    0x01, 0x00, 5,   
+    0x01, 0x01, 10,  
+    0x01, 0x02, 3,   
+    0x02, 0x00, 0x01, 
+    0x02, 0x00, 0x01, 
+    0x02, 0x00, 0x01, 
+    0x01, 0x02, 1,   
+    0x03, 0x06,      
+    0xFF            
+];
+
+    cpu.load_program(&program);
+    cpu.execute();
+
+    println!("Final CPU State: {:?}", cpu);
+}
