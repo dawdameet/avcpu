@@ -1,26 +1,42 @@
 mod cpu;
 use cpu::CPU;
+use std::env;
+use std::fs::File;
+use std::io::{Read, Write};
+use std::process::Command;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    
+    if args.len() < 2 {
+        println!("❌ Usage: cargo run -- <source.asm>");
+        return;
+    }
+
+    let source_file = &args[1];
+    let binary_file = "program.bin";
+
+    println!("📜 Assembling {}...", source_file);
+    let assembler_output = Command::new("cargo")
+        .args(&["run", "--bin", "assembler"])
+        .output()
+        .expect("❌ Failed to run assembler");
+
+    if !assembler_output.status.success() {
+        println!("❌ Assembler Error:\n{}", String::from_utf8_lossy(&assembler_output.stderr));
+        return;
+    }
+
+    println!("⚙️ Running AI-powered CPU Emulator...");
+    let mut file = File::open(binary_file).expect("❌ Failed to open binary file");
+    let mut binary_data = Vec::new();
+    file.read_to_end(&mut binary_data).expect("❌ Failed to read binary file");
     let mut cpu = CPU::new();
     cpu.load_execution_history();
-    let program: [u8; 18] = [
-        0x01, 0x00, 5,   
-        0x01, 0x00, 5,  
-        0x01, 0x01, 10,
-        0x02, 0x00, 0x01,
-        0x02, 0x00, 0x01,
-        0x03, 0x09,
-        0xFF            
-    ];
-
-    println!("🔧 Optimizing Program...");
-    let optimized_program = cpu.optimize_program(&program);
-    println!("🚀 Running Optimized Program...");
-
-    cpu.load_program("program.bin");
+    cpu.load_program(&binary_data);
     cpu.execute();
     cpu.save_execution_history();
 
-    println!("Final CPU State: {:?}", cpu);
+    println!("✅ Execution complete!");
+    println!("🏁 Final CPU State: {:?}", cpu);
 }
