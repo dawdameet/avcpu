@@ -1,4 +1,4 @@
-#[allow(unused_features)]
+#![allow(dead_code)]
 
 use ndarray::Array2;
 // use statrs::statistics::{MeanN, VarianceN};

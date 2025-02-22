@@ -1,110 +1,98 @@
+### **AI-Powered CPU Emulator – README (Updated)**  
 
-# 🚀 AI-Optimized Virtual CPU (avcpu)  
-
-## 📌 Overview  
-**avcpu** is a virtual CPU with AI-powered instruction optimization, execution path prediction, and loop detection.  
-This project goes beyond basic CPU emulation by **analyzing, optimizing, and executing programs efficiently**—just like modern compilers and processors do.  
-
----
-
-## ⚡ Features  
-✅ **AI-Powered Code Optimization**  
-- Eliminates redundant instructions (e.g., repeated `MOV R0, 5`).  
-- Merges consecutive arithmetic operations for efficiency.  
-- Removes unnecessary `JMP` instructions that do nothing.  
-
-✅ **AI Execution Path Prediction**  
-- Predicts the most likely next instruction to execute.  
-- Avoids unnecessary jumps and redundant operations.  
-- Learns from execution history to optimize future runs.  
-
-✅ **Loop Detection & Prevention**  
-- Detects infinite loops and halts execution automatically.  
-- Skips instructions that cause unnecessary execution cycles.  
-- Displays warnings when AI detects an execution loop.  
-
-✅ **Efficient Execution Model**  
-- Supports basic CPU instructions: `MOV`, `ADD`, `JMP`, `HALT`.  
-- Uses AI to dynamically optimize program execution before running.  
-- Significantly reduces instruction execution time.  
+## **Overview**  
+This project is an **AI-optimized CPU emulator** that interprets a custom **assembly language** and dynamically **modifies itself for optimization**. The system includes:  
+- **Assembler**: Converts `.asmcpu` assembly files into binary format.  
+- **CPU Emulator**: Executes binary instructions with **AI-driven optimizations**.  
+- **Self-Healing Code**: Detects inefficiencies and modifies instructions during runtime.  
+- **Statistical Analysis**: Uses execution history to identify patterns and redundant code.  
 
 ---
 
-## 🔧 Installation  
-1. Clone the repository:  
-   ```bash
-   git clone https://github.com/dawdameet/avcpu.git
-   cd avcpu
-   ```
-2. Build the project:  
-   ```bash
-   cargo build
-   ```
-3. Run an optimized program:  
-   ```bash
-   cargo run
-   ```
+## **🛠 Features**  
+
+### 🔥 **New Technical Additions**
+1. **🚀 AI-Driven Optimization**  
+   - Detects redundant MOV instructions and removes them.  
+   - Auto-loop unrolling for small loops.  
+   - Identifies frequently executed sequences and optimizes branching.  
+
+2. **📊 Statistical Execution Modeling**  
+   - Tracks probability distribution of executed instructions.  
+   - Uses historical execution data to predict inefficiencies.  
+   - Stores execution patterns in `execution_data.json` for learning.  
+
+3. **🔄 Self-Healing Code**  
+   - Modifies the binary file dynamically to eliminate unnecessary instructions.  
+   - Writes optimized code back to disk after execution.  
+
+4. **🧠 AI-Powered Assembler**  
+   - Detects and removes unnecessary MOV and ADD operations.  
+   - AI-suggested optimizations annotated in `.asmcpu` files.  
+
+5. **⚡ Multithreading (Rayon-Powered)**
+   - Pattern recognition runs in parallel for faster execution.  
+   - Execution profiling happens concurrently with program execution.  
 
 ---
 
-## 🚀 How It Works  
+## **🚀 Usage**
+### **Compile & Run**
+```sh
+make assemble      # Assemble program.asmcpu -> program.bin
+make main          # Run AI-powered CPU emulator
+```
 
-### **🔹 Example Program (Before AI Optimization)**  
+### **Example Assembly Code (`program.asmcpu`)**
 ```assembly
-MOV R0, 5
-MOV R0, 5  ; Redundant
-MOV R1, 10
-ADD R0, R1
-ADD R0, R1  ; Repeated addition
-JMP 9       ; Unnecessary jump
+MOV R1, 4
+MOV R1, 4  ; AI will remove this redundant line
+MOV R2, 9
+MOV R2, 9  ; AI detects duplicate assignments
+MOV R0, 2
+ADD R1, R0
 HALT
 ```
 
-### **⚡ Optimized by AI**
-```assembly
-MOV R0, 5
-MOV R1, 10
-ADD R0, R1  ; Merged repeated ADDs
-HALT
+### **AI Execution Output**
+```sh
+📜 Assembling program.bin...
+⚙️ Running AI-powered CPU Emulator...
+📊 AI Loaded Execution Data from Previous Runs!
+🛠 AI Optimization: Removing redundant MOV R1, 4 at PC 3
+💾 AI Optimization: Saving changes to program.bin
+📁 AI Execution Data Successfully Saved!
+✅ Execution complete!
 ```
-- **Redundant MOV removed**  
-- **Merged ADD operations**  
-- **Useless JMP eliminated**  
 
 ---
 
-## 🏆 Real-World Applications  
-
-### **🔹 AI-Assisted Code Compilation**  
-Modern compilers use similar techniques to **eliminate redundant code, optimize loops, and reorder instructions**.  
-This project demonstrates **how AI can be used to improve program execution efficiency** before running code.  
-
-### **🔹 Virtual Machine Optimization**  
-- If a VM needs to **execute bytecode faster**, AI can **pre-optimize** the instruction set dynamically.  
-- This can significantly **improve performance** without modifying the original program.  
-
-### **🔹 Embedded Systems & AI Accelerators**  
-- Low-power embedded devices **must execute code efficiently** with limited resources.  
-- AI-based CPU instruction optimization ensures **minimal power consumption & max performance**.  
-
-### **🔹 JIT Compilation for AI Workloads**  
-- AI models running on CPUs can **benefit from real-time instruction reordering** to improve speed.  
-- This concept is similar to **LLVM optimizations used in AI model execution.**  
+## **📁 File Structure**
+```
+├── Cargo.toml
+├── Makefile
+├── execution_data.json      # AI execution learning data
+├── program.asmcpu           # Assembly source file
+├── program.bin              # Compiled binary
+├── src
+│   ├── assembler.rs         # Assembler
+│   ├── cpu.rs               # CPU emulator
+│   ├── ai_optimizer.rs      # AI optimization module
+│   ├── main.rs              # Entry point
+```
 
 ---
 
-## 📜 License  
-This project is licensed under the **MIT License**.  
+## **📌 Real-World Use Cases**
+1. **AI-Based Compiler Optimization**  
+   - Can be extended to optimize real-world assembly code automatically.  
+2. **Low-Level AI-Enhanced Code Execution**  
+   - Conceptually similar to JIT compilers but at an **assembly level**.  
+3. **Self-Healing Systems**  
+   - Used in OS kernels to **dynamically patch inefficiencies** at runtime.  
+4. **AI-Optimized Virtual Machines**  
+   - Can be used for **AI-enhanced emulation** in security research & malware analysis.  
 
 ---
 
-## 💡 Future Enhancements  
-🔹 **AI Self-Learning Optimization** – Adaptive optimization based on past runs.  
-🔹 **Dead Code Elimination** – Remove instructions that never execute.  
-🔹 **Dynamic Loop Unrolling** – Optimize loops for performance.  
-🔹 **JIT Compilation** – AI recompiles and optimizes code at runtime.  
-
----
-
-🔥 **Ready to test it? Clone the repo and optimize some programs!** 🚀  
-
+This README now reflects the **latest AI optimizations, assembler improvements, and technical features**. Let me know if you want more changes! 🚀🔥
