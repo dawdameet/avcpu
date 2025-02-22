@@ -2,14 +2,18 @@
 name = "avcpu"
 version = "0.1.0"
 edition = "2024"
+
 [[bin]]
 name = "assembler"
 path = "src/assembler.rs"
 
+[[bin]]
+name = "avcpu"
+path = "src/main.rs"
 
 [dependencies]
-bincode = "1.3.3"
-file = "1.1.2"
-rand = "0.9.0"
-serde = {version="1.0.218", features=["derive"]}
-serde_json = "1.0.139"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ndarray = "0.15.6"       # For pattern recognition
+rayon = "1.10.0"         # Parallel processing
+statrs = "0.16.0"        # Statistical analysis
