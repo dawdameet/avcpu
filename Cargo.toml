@@ -2,6 +2,10 @@
 name = "avcpu"
 version = "0.1.0"
 edition = "2024"
+[[bin]]
+name = "assembler"
+path = "src/assembler.rs"
+
 
 [dependencies]
 bincode = "1.3.3"

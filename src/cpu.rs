@@ -4,6 +4,7 @@ use serde_json;
 use std::collections::{HashMap, VecDeque};
 use serde::{Serialize, Deserialize};
 use std::fs::OpenOptions;
+use std::fs::read;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CPU {
@@ -48,10 +49,12 @@ impl CPU {
         }
     }
     
-
-    pub fn load_program(&mut self, program: &[u8]) {
-        self.memory[..program.len()].copy_from_slice(program);
+    pub fn load_program(&mut self, filename: &str) {
+        let program = read(filename).expect("❌ Failed to read binary file");
+        self.memory[..program.len()].copy_from_slice(&program);
+        println!("✅ Loaded binary program: {} bytes", program.len());
     }
+
 
     pub fn save_execution_history(&self) {
         println!("📋 Execution History Before Saving: {:?}", self.execution_history);

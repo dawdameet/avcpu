@@ -21,10 +21,8 @@ fn main() {
     let optimized_program = cpu.optimize_program(&program);
     println!("🚀 Running Optimized Program...");
 
-    cpu.load_program(&optimized_program);
+    cpu.load_program("program.bin");
     cpu.execute();
-
-    // Save AI Execution Data
     cpu.save_execution_history();
 
     println!("Final CPU State: {:?}", cpu);
