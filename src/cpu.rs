@@ -4,6 +4,7 @@ use serde_json;
 use std::collections::{HashMap, VecDeque};
 use serde::{Serialize, Deserialize};
 use std::fs::OpenOptions;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CPU {
     registers: [i32; 4],
@@ -56,8 +57,6 @@ impl CPU {
         println!("📋 Execution History Before Saving: {:?}", self.execution_history);
     
         let mut merged_data = HashMap::new();
-    
-        // ✅ Load existing data first
         if let Ok(mut file) = File::open("execution_data.json") {
             let mut json_data = String::new();
             if file.read_to_string(&mut json_data).is_ok() {
@@ -66,13 +65,9 @@ impl CPU {
                 }
             }
         }
-    
-        // ✅ Merge new execution counts
         for (pc, count) in &self.execution_history {
             *merged_data.entry(*pc).or_insert(0) += count;
         }
-    
-        // ✅ Save updated execution history
         match serde_json::to_string_pretty(&merged_data) {
             Ok(json) => {
                 let mut file = match OpenOptions::new()
@@ -150,8 +145,6 @@ impl CPU {
     pub fn execute(&mut self) {
         while !self.halted {
             let pc = self.pc;
-    
-            // Update both execution_count and execution_history
             *self.execution_count.entry(pc).or_insert(0) += 1;
             *self.execution_history.entry(pc).or_insert(0) += 1;
     
