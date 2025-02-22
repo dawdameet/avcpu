@@ -55,7 +55,25 @@ impl CPU {
     pub fn save_execution_history(&self) {
         println!("📋 Execution History Before Saving: {:?}", self.execution_history);
     
-        match serde_json::to_string_pretty(&self.execution_history) {
+        let mut merged_data = HashMap::new();
+    
+        // ✅ Load existing data first
+        if let Ok(mut file) = File::open("execution_data.json") {
+            let mut json_data = String::new();
+            if file.read_to_string(&mut json_data).is_ok() {
+                if let Ok(prev_data) = serde_json::from_str::<HashMap<usize, usize>>(&json_data) {
+                    merged_data = prev_data;
+                }
+            }
+        }
+    
+        // ✅ Merge new execution counts
+        for (pc, count) in &self.execution_history {
+            *merged_data.entry(*pc).or_insert(0) += count;
+        }
+    
+        // ✅ Save updated execution history
+        match serde_json::to_string_pretty(&merged_data) {
             Ok(json) => {
                 let mut file = match OpenOptions::new()
                     .write(true)
@@ -79,6 +97,7 @@ impl CPU {
             Err(e) => println!("❌ Error serializing execution data: {}", e),
         }
     }
+    
 
     pub fn optimize_program(&mut self, program: &[u8]) -> Vec<u8> {
         let mut optimized_program = Vec::new();
