@@ -34,13 +34,20 @@ impl CPU {
     pub fn load_execution_history(&mut self) {
         if let Ok(mut file) = File::open("execution_data.json") {
             let mut json_data = String::new();
-            file.read_to_string(&mut json_data).unwrap();
-            self.execution_history = serde_json::from_str(&json_data).unwrap();
-            println!("📊 AI Loaded Execution Data from Previous Runs!");
+            if file.read_to_string(&mut json_data).is_ok() {
+                if let Ok(prev_data) = serde_json::from_str::<HashMap<usize, usize>>(&json_data) {
+                    println!("📊 AI Loaded Execution Data from Previous Runs!");
+                    for (pc, count) in prev_data {
+                        *self.execution_history.entry(pc).or_insert(0) += count; // ✅ Merge data
+                    }
+                }
+            }
         } else {
             println!("⚠️ No Previous Execution Data Found. AI Starting Fresh.");
         }
     }
+    
+
     pub fn load_program(&mut self, program: &[u8]) {
         self.memory[..program.len()].copy_from_slice(program);
     }
